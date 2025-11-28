@@ -13,9 +13,16 @@ import org.tudalgo.algoutils.student.annotation.StudentImplementationRequired;
 public class Rock implements Mineable {
 
     /**
+     * Die aktuelle Haltbarkeit des Steins.
+     */
+    private double durability;
+
+    /**
      * Constructs a new {@link Rock} instance.
      */
     public Rock() {
+        // Rock startet mit voller Haltbarkeit.
+        setDurability(100);
     }
 
     @StudentImplementationRequired("H5.3")
@@ -39,18 +46,27 @@ public class Rock implements Mineable {
     @StudentImplementationRequired("H5.1")
     @Override
     public double getDurability() {
-        return org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.1 - remove if implemented
+        // Gibt die aktuelle Haltbarkeit zurück.
+        return durability;
     }
 
     @StudentImplementationRequired("H5.1")
     @Override
     public void setDurability(double durability) {
-        org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.1 - remove if implemented
+        // Klemmt die Haltbarkeit in den Bereich [0, 100].
+        if (durability < 0) {
+            this.durability = 0;
+        } else if (durability > 100) {
+            this.durability = 100;
+        } else {
+            this.durability = durability;
+        }
     }
 
     @StudentImplementationRequired("H5.1")
     @Override
     public void reduceDurability(double amount) {
-        org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.1 - remove if implemented
+        // Reduziert die Haltbarkeit sicher über den Setter.
+        setDurability(getDurability() - amount);
     }
 }
