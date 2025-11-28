@@ -10,6 +10,7 @@ import h05.equipment.Battery;
 import h05.equipment.Camera;
 import h05.equipment.Equipment;
 import h05.equipment.Tool;
+import h05.mineable.Mineable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.tudalgo.algoutils.student.annotation.DoNotTouch;
@@ -229,7 +230,41 @@ public class MineBot extends Robot implements Miner {
     @StudentImplementationRequired("H5.4.1")
     @Override
     public void mine() {
-        org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.4.1 - remove if implemented
+        // Zielkoordinate basierend auf aktueller Blickrichtung bestimmen
+        int targetX = getX();
+        int targetY = getY();
+        if (getDirection() == Direction.UP) {
+            targetY++;
+        } else if (getDirection() == Direction.RIGHT) {
+            targetX++;
+        } else if (getDirection() == Direction.DOWN) {
+            targetY--;
+        } else {
+            targetX--;
+        }
+
+        // Wenn ein Wall blockiert oder das Feld außerhalb liegt, abbrechen
+        if (!isFrontClear()) {
+            return;
+        }
+
+        // Loot auf dem Zielfeld bestimmen
+        Mineable loot = getGameSettings().getLootAt(targetX, targetY);
+        if (loot == null) {
+            return;
+        }
+
+        // Abbau mit aktuellem Werkzeug durchführen
+        boolean minedCompletely = loot.onMined(getTool());
+        if (!minedCompletely) {
+            return;
+        }
+
+        // Abgebauten Rohstoff ins Inventar übernehmen, sonst abstürzen
+        boolean added = getInventory().add(loot);
+        if (!added) {
+            crash();
+        }
     }
 
     @DoNotTouch
