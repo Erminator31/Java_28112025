@@ -21,6 +21,11 @@ public class Camera implements Equipment {
     private int visibilityRange;
 
     /**
+     * Die aktuelle Haltbarkeit der Kamera.
+     */
+    private double durability;
+
+    /**
      * Constructs a new {@link Camera} instance with the specified visibility range.
      *
      * @param visibilityRange the visibility range of the camera, must be at least 1
@@ -28,6 +33,8 @@ public class Camera implements Equipment {
     @DoNotTouch
     public Camera(int visibilityRange) {
         this.visibilityRange = visibilityRange;
+        // Kamera startet immer mit voller Haltbarkeit.
+        setDurability(100);
     }
 
     /**
@@ -87,18 +94,27 @@ public class Camera implements Equipment {
     @Override
     @StudentImplementationRequired("H5.1")
     public double getDurability() {
-        return org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.1 - remove if implemented
+        // Liefert die aktuelle Haltbarkeit zurück.
+        return durability;
     }
 
     @Override
     @StudentImplementationRequired("H5.1")
     public void setDurability(double durability) {
-        org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.1 - remove if implemented
+        // Klemmt die Haltbarkeit auf den Bereich [0, 100].
+        if (durability < 0) {
+            this.durability = 0;
+        } else if (durability > 100) {
+            this.durability = 100;
+        } else {
+            this.durability = durability;
+        }
     }
 
     @Override
     @StudentImplementationRequired("H5.1")
     public void reduceDurability(double amount) {
-        org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.1 - remove if implemented
+        // Reduziert die Haltbarkeit und validiert anschließend über den Setter.
+        setDurability(getDurability() - amount);
     }
 }
