@@ -21,13 +21,21 @@ public class Camera implements Equipment {
     private int visibilityRange;
 
     /**
+     * Die aktuelle Haltbarkeit der Kamera.
+     */
+    private double durability;
+
+    /**
      * Constructs a new {@link Camera} instance with the specified visibility range.
      *
      * @param visibilityRange the visibility range of the camera, must be at least 1
      */
     @DoNotTouch
     public Camera(int visibilityRange) {
-        this.visibilityRange = visibilityRange;
+        // Initialisiert die Sichtweite über den Setter, damit die Validierung greift.
+        setVisibilityRange(visibilityRange);
+        // Kamera startet immer mit voller Haltbarkeit.
+        setDurability(100);
     }
 
     /**
@@ -45,7 +53,8 @@ public class Camera implements Equipment {
      */
     @StudentImplementationRequired("H5.2.2")
     public int getVisibilityRange() {
-        return org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.2.2 - remove if implemented
+        // Gibt die aktuelle Sichtweite zurück.
+        return visibilityRange;
     }
 
     /**
@@ -57,19 +66,32 @@ public class Camera implements Equipment {
      */
     @StudentImplementationRequired("H5.2.2")
     public void setVisibilityRange(int visibilityRange) {
-        org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.2.2 - remove if implemented
+        // Sichtweite darf minimal 1 sein.
+        this.visibilityRange = Math.max(1, visibilityRange);
     }
 
     @Override
     @StudentImplementationRequired("H5.2")
     public @NotNull String getName() {
-        return org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.2 - remove if implemented
+        // Klassennamen als eindeutigen Ausrüstungsnamen zurückgeben.
+        return getClass().getSimpleName();
     }
 
     @StudentImplementationRequired("H5.2.1")
     @Override
     public @NotNull EquipmentCondition getCondition() {
-        return org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.2.1 - remove if implemented;
+        // Bestimmt den Zustand anhand der Haltbarkeit.
+        double currentDurability = getDurability();
+
+        if (currentDurability >= 81) {
+            return EquipmentCondition.NEW;
+        } else if (currentDurability >= 41) {
+            return EquipmentCondition.USED;
+        } else if (currentDurability >= 1) {
+            return EquipmentCondition.DAMAGED;
+        }
+
+        return EquipmentCondition.BROKEN;
     }
 
     @Override
@@ -87,18 +109,27 @@ public class Camera implements Equipment {
     @Override
     @StudentImplementationRequired("H5.1")
     public double getDurability() {
-        return org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.1 - remove if implemented
+        // Liefert die aktuelle Haltbarkeit zurück.
+        return durability;
     }
 
     @Override
     @StudentImplementationRequired("H5.1")
     public void setDurability(double durability) {
-        org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.1 - remove if implemented
+        // Klemmt die Haltbarkeit auf den Bereich [0, 100].
+        if (durability < 0) {
+            this.durability = 0;
+        } else if (durability > 100) {
+            this.durability = 100;
+        } else {
+            this.durability = durability;
+        }
     }
 
     @Override
     @StudentImplementationRequired("H5.1")
     public void reduceDurability(double amount) {
-        org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.1 - remove if implemented
+        // Reduziert die Haltbarkeit und validiert anschließend über den Setter.
+        setDurability(getDurability() - amount);
     }
 }

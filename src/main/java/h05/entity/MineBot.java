@@ -8,8 +8,11 @@ import h05.base.mineable.Inventory;
 import h05.base.ui.InfoPopup;
 import h05.equipment.Battery;
 import h05.equipment.Camera;
+import h05.equipment.EquipmentCondition;
 import h05.equipment.Equipment;
 import h05.equipment.Tool;
+import h05.equipment.UsableEquipment;
+import h05.mineable.Mineable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.tudalgo.algoutils.student.annotation.DoNotTouch;
@@ -114,19 +117,73 @@ public class MineBot extends Robot implements Miner {
     @StudentImplementationRequired("H5.4.2")
     @Override
     public @NotNull Point[] getVision(int x, int y) {
-        return org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.4.2 - remove if implemented
+        // Ist die Kamera kaputt, hat der Miner keine Sichtweite.
+        if (isCameraBroken()) {
+            return new Point[0];
+        }
+
+        // Sichtbarkeitsradius der Kamera bestimmen.
+        int visibilityRange = getCamera().getVisibilityRange();
+
+        // Alle sichtbaren Punkte innerhalb der Weltgrenzen sammeln (Manhattan-Radius).
+        java.util.List<Point> visiblePoints = new java.util.ArrayList<>();
+        for (int dx = -visibilityRange; dx <= visibilityRange; dx++) {
+            for (int dy = -visibilityRange; dy <= visibilityRange; dy++) {
+                if (Math.abs(dx) + Math.abs(dy) > visibilityRange) {
+                    continue;
+                }
+
+                int targetX = x + dx;
+                int targetY = y + dy;
+
+                // Nur Felder innerhalb der Welt berücksichtigen.
+                if (targetX >= 0 && targetX < h05.base.game.GameConstants.WORLD_WIDTH
+                    && targetY >= 0 && targetY < h05.base.game.GameConstants.WORLD_HEIGHT) {
+                    visiblePoints.add(new Point(targetX, targetY));
+                }
+            }
+        }
+
+        return visiblePoints.toArray(Point[]::new);
     }
 
     @StudentImplementationRequired("H5.4.2")
     @Override
     public void updateVision(int oldX, int oldY, int newX, int newY) {
-        org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.4.2 - remove if implemented
+        // Alte und neue Sichtbereiche ermitteln.
+        Point[] oldVision = getVision(oldX, oldY);
+        Point[] newVision = getVision(newX, newY);
+
+        // Neue Sichtpunkte sichtbar machen.
+        for (Point point : newVision) {
+            settings.removeFog(point.x, point.y);
+        }
+
+        // Punkte, die nicht mehr im Sichtbereich liegen, wieder verdecken.
+        java.util.Set<Point> newVisionSet = new java.util.HashSet<>(java.util.List.of(newVision));
+        for (Point point : oldVision) {
+            if (!newVisionSet.contains(point)) {
+                settings.placeFog(point.x, point.y);
+            }
+        }
     }
 
     @StudentImplementationRequired("H5.4.3")
     @Override
     public void move() {
-        org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.4.3 - remove if implemented
+        // Keine Bewegung möglich, falls die Batterie bereits kaputt ist.
+        if (getBattery().getCondition() == EquipmentCondition.BROKEN) {
+            return;
+        }
+
+        // Alte Position sichern, Bewegung wie in der Oberklasse ausführen und neue Sicht berechnen.
+        int oldX = getX();
+        int oldY = getY();
+        super.move();
+        updateVision(oldX, oldY, getX(), getY());
+
+        // Haltbarkeit der Batterie um die Anzahl ausgerüsteter Gegenstände verringern.
+        getBattery().reduceDurability(getNumberOfEquipments());
     }
 
     @DoNotTouch
@@ -152,7 +209,30 @@ public class MineBot extends Robot implements Miner {
     @StudentImplementationRequired("H5.4.4")
     @Override
     public void use(int index) {
-        org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.4.4 - remove if implemented
+        // Zählt nur nutzbare Ausrüstungen und aktiviert die n-te (0-basiert) Komponente.
+        int usableCounter = 0;
+        for (int i = 0; i < nextIndex; i++) {
+            UsableEquipment usable = settings.toUsableEquipment(equipments[i]);
+            if (usable == null) {
+                continue;
+            }
+
+            if (usableCounter == index) {
+                // Ausrüstung auf diesem Miner anwenden.
+                usable.use(this);
+
+                // Bei TelephotoLens muss die Sicht sofort aktualisiert werden.
+                if ("TelephotoLens".equals(usable.getName())) {
+                    updateVision(getX(), getY(), getX(), getY());
+                }
+
+                // Weltaktualisierung nach der Benutzung anstoßen.
+                settings.update();
+                return;
+            }
+
+            usableCounter++;
+        }
     }
 
     @DoNotTouch
@@ -229,7 +309,41 @@ public class MineBot extends Robot implements Miner {
     @StudentImplementationRequired("H5.4.1")
     @Override
     public void mine() {
-        org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.4.1 - remove if implemented
+        // Zielkoordinate basierend auf aktueller Blickrichtung bestimmen
+        int targetX = getX();
+        int targetY = getY();
+        if (getDirection() == Direction.UP) {
+            targetY++;
+        } else if (getDirection() == Direction.RIGHT) {
+            targetX++;
+        } else if (getDirection() == Direction.DOWN) {
+            targetY--;
+        } else {
+            targetX--;
+        }
+
+        // Wenn ein Wall blockiert oder das Feld außerhalb liegt, abbrechen
+        if (!isFrontClear()) {
+            return;
+        }
+
+        // Loot auf dem Zielfeld bestimmen
+        Mineable loot = getGameSettings().getLootAt(targetX, targetY);
+        if (loot == null) {
+            return;
+        }
+
+        // Abbau mit aktuellem Werkzeug durchführen
+        boolean minedCompletely = loot.onMined(getTool());
+        if (!minedCompletely) {
+            return;
+        }
+
+        // Abgebauten Rohstoff ins Inventar übernehmen, sonst abstürzen
+        boolean added = getInventory().add(loot);
+        if (!added) {
+            crash();
+        }
     }
 
     @DoNotTouch
