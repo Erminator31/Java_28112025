@@ -28,19 +28,45 @@ public class Tree implements Mineable {
     @StudentImplementationRequired("H5.3")
     @Override
     public @NotNull MiningProgress getProgress() {
-        return org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.3 - remove if implemented
+        // 0 => fertig, 100 => unberührt, dazwischen => Abbau läuft.
+        if (getDurability() == 0) {
+            return MiningProgress.COMPLETED;
+        }
+        if (getDurability() < 100 && getDurability() >= 1) {
+            return MiningProgress.IN_PROGRESS;
+        }
+        return MiningProgress.UNSTARTED;
     }
 
     @StudentImplementationRequired("H5.3")
     @Override
     public @NotNull String getName() {
-        return org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.3 - remove if implemented
+        // Gibt den Klassennamen als eindeutige Kennung zurück.
+        return getClass().getSimpleName();
     }
 
     @StudentImplementationRequired("H5.3")
     @Override
     public boolean onMined(@Nullable Tool tool) {
-        return org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.3 - remove if implemented
+        // Bestimmt die abzuziehende Haltbarkeit je nach Werkzeug.
+        double reduction = 0;
+
+        if (tool == null) {
+            // Ohne Werkzeug: fester Abbauwert.
+            reduction = 7.5;
+        } else if (tool instanceof h05.equipment.Axe) {
+            // Axt: vierfache Werkzeugstärke.
+            reduction = 4 * tool.getMiningPower();
+        } else if (tool instanceof h05.equipment.Pickaxe) {
+            // Spitzhacke: dreifache Werkzeugstärke.
+            reduction = 3 * tool.getMiningPower();
+        }
+
+        // Reduziert die Haltbarkeit um den berechneten Wert.
+        reduceDurability(reduction);
+
+        // Gibt zurück, ob der Baum vollständig abgebaut ist.
+        return getDurability() == 0;
     }
 
     @StudentImplementationRequired("H5.1")
