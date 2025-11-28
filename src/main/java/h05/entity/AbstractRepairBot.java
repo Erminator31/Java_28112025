@@ -5,6 +5,7 @@ import fopbot.Robot;
 import fopbot.RobotFamily;
 import h05.Durable;
 import h05.base.game.GameSettings;
+import h05.equipment.Equipment;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.tudalgo.algoutils.student.annotation.DoNotTouch;
@@ -63,13 +64,53 @@ public abstract class AbstractRepairBot extends Robot implements Repairer {
     @StudentImplementationRequired("H5.5")
     @Override
     public @Nullable Point scan() {
-        return org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.5 - remove if implemented
+        // Umliegende Felder innerhalb des Radius nach einem Miner absuchen (Manhattan-Abstand).
+        for (int dx = -getRadius(); dx <= getRadius(); dx++) {
+            for (int dy = -getRadius(); dy <= getRadius(); dy++) {
+                if (Math.abs(dx) + Math.abs(dy) > getRadius()) {
+                    continue;
+                }
+
+                int targetX = getX() + dx;
+                int targetY = getY() + dy;
+                Miner miner = settings.getMinerAt(targetX, targetY);
+                if (miner != null) {
+                    return new Point(targetX, targetY);
+                }
+            }
+        }
+
+        // Kein Miner im Suchradius gefunden.
+        return null;
     }
 
     @StudentImplementationRequired("H5.5")
     @Override
     public void repair(@NotNull Point point) {
-        org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.5 - remove if implemented
+        // Zum angegebenen Punkt bewegen.
+        move(point);
+
+        // Miner an der Zielposition bestimmen; existiert keiner, endet die Reparatur.
+        Miner miner = settings.getMinerAt(point.x, point.y);
+        if (miner == null) {
+            return;
+        }
+
+        // Kaputte Batterie bzw. Kamera durch neue Exemplare ersetzen.
+        if (miner.isBatteryBroken()) {
+            miner.equip(new h05.equipment.Battery());
+        }
+        if (miner.isCameraBroken()) {
+            miner.equip(new h05.equipment.Camera());
+        }
+
+        // Weitere kaputte Ausrüstung entfernen (ausgenommen Batterie und Kamera an Index 0 bzw. 1).
+        Equipment[] equipments = miner.getEquipments();
+        for (int i = 2; i < equipments.length && equipments[i] != null; i++) {
+            if (equipments[i].getCondition() == h05.equipment.EquipmentCondition.BROKEN) {
+                miner.unequip(i - 2);
+            }
+        }
     }
 
     /**

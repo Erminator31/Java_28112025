@@ -34,7 +34,6 @@ public class Camera implements Equipment {
     public Camera(int visibilityRange) {
         // Initialisiert die Sichtweite über den Setter, damit die Validierung greift.
         setVisibilityRange(visibilityRange);
-        this.visibilityRange = visibilityRange;
         // Kamera startet immer mit voller Haltbarkeit.
         setDurability(100);
     }
