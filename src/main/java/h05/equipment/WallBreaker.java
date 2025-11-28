@@ -12,9 +12,16 @@ import org.tudalgo.algoutils.student.annotation.StudentImplementationRequired;
 public class WallBreaker implements UsableEquipment {
 
     /**
+     * Die aktuelle Haltbarkeit des Wandbrechers.
+     */
+    private double durability;
+
+    /**
      * Constructs a new {@link WallBreaker} instance.
      */
     public WallBreaker() {
+        // Startet mit maximaler Haltbarkeit.
+        setDurability(100);
     }
 
     @StudentImplementationRequired("H5.2.5")
@@ -38,18 +45,27 @@ public class WallBreaker implements UsableEquipment {
     @StudentImplementationRequired("H5.1")
     @Override
     public double getDurability() {
-        return org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.1 - remove if implemented
+        // Gibt die Haltbarkeit zurück.
+        return durability;
     }
 
     @StudentImplementationRequired("H5.1")
     @Override
     public void setDurability(double durability) {
-        org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.1 - remove if implemented
+        // Klemmt den Wert auf den erlaubten Bereich [0, 100].
+        if (durability < 0) {
+            this.durability = 0;
+        } else if (durability > 100) {
+            this.durability = 100;
+        } else {
+            this.durability = durability;
+        }
     }
 
     @StudentImplementationRequired("H5.1")
     @Override
     public void reduceDurability(double amount) {
-        org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.1 - remove if implemented
+        // Verringert die Haltbarkeit über den Setter, damit die Klammerung greift.
+        setDurability(getDurability() - amount);
     }
 }
