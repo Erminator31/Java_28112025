@@ -8,8 +8,10 @@ import h05.base.mineable.Inventory;
 import h05.base.ui.InfoPopup;
 import h05.equipment.Battery;
 import h05.equipment.Camera;
+import h05.equipment.EquipmentCondition;
 import h05.equipment.Equipment;
 import h05.equipment.Tool;
+import h05.equipment.UsableEquipment;
 import h05.mineable.Mineable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -169,7 +171,19 @@ public class MineBot extends Robot implements Miner {
     @StudentImplementationRequired("H5.4.3")
     @Override
     public void move() {
-        org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.4.3 - remove if implemented
+        // Keine Bewegung möglich, falls die Batterie bereits kaputt ist.
+        if (getBattery().getCondition() == EquipmentCondition.BROKEN) {
+            return;
+        }
+
+        // Alte Position sichern, Bewegung wie in der Oberklasse ausführen und neue Sicht berechnen.
+        int oldX = getX();
+        int oldY = getY();
+        super.move();
+        updateVision(oldX, oldY, getX(), getY());
+
+        // Haltbarkeit der Batterie um die Anzahl ausgerüsteter Gegenstände verringern.
+        getBattery().reduceDurability(getNumberOfEquipments());
     }
 
     @DoNotTouch
@@ -195,7 +209,30 @@ public class MineBot extends Robot implements Miner {
     @StudentImplementationRequired("H5.4.4")
     @Override
     public void use(int index) {
-        org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.4.4 - remove if implemented
+        // Zählt nur nutzbare Ausrüstungen und aktiviert die n-te (0-basiert) Komponente.
+        int usableCounter = 0;
+        for (int i = 0; i < nextIndex; i++) {
+            UsableEquipment usable = settings.toUsableEquipment(equipments[i]);
+            if (usable == null) {
+                continue;
+            }
+
+            if (usableCounter == index) {
+                // Ausrüstung auf diesem Miner anwenden.
+                usable.use(this);
+
+                // Bei TelephotoLens muss die Sicht sofort aktualisiert werden.
+                if ("TelephotoLens".equals(usable.getName())) {
+                    updateVision(getX(), getY(), getX(), getY());
+                }
+
+                // Weltaktualisierung nach der Benutzung anstoßen.
+                settings.update();
+                return;
+            }
+
+            usableCounter++;
+        }
     }
 
     @DoNotTouch
