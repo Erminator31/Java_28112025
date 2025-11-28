@@ -75,10 +75,14 @@ public class GameLoop extends GameLoopBase {
     protected void initRobots() {
         // MineBot (blauer Roboter) mit Blick nach Osten erstellen.
         MineBot mineBot = new MineBot(1, 1, getGameSettings());
-        mineBot.setDirection(Direction.RIGHT);
+        while (mineBot.getDirection() != Direction.RIGHT) {
+            mineBot.turnLeft();
+        }
 
         // Repairer (roter Roboter) mit wählbarem Scan-Radius platzieren.
-        Repairer repairer = new TeleportRepairBot(5, 5, getGameSettings(), 3);
-        repairer.setDirection(Direction.LEFT);
+        TeleportRepairBot repairer = new TeleportRepairBot(5, 5, getGameSettings(), 3);
+        while (repairer.getDirection() != Direction.LEFT) {
+            repairer.turnLeft();
+        }
     }
 }
