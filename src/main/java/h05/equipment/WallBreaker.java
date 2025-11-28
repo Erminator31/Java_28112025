@@ -39,7 +39,18 @@ public class WallBreaker implements UsableEquipment {
     @StudentImplementationRequired("H5.2.1")
     @Override
     public @NotNull EquipmentCondition getCondition() {
-        return org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.2.1 - remove if implemented;
+        // Leitet den Zustand aus der aktuellen Haltbarkeit ab.
+        double currentDurability = getDurability();
+
+        if (currentDurability >= 81) {
+            return EquipmentCondition.NEW;
+        } else if (currentDurability >= 41) {
+            return EquipmentCondition.USED;
+        } else if (currentDurability >= 1) {
+            return EquipmentCondition.DAMAGED;
+        }
+
+        return EquipmentCondition.BROKEN;
     }
 
     @StudentImplementationRequired("H5.1")
