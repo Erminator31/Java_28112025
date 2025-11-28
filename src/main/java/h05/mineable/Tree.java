@@ -13,9 +13,16 @@ import org.tudalgo.algoutils.student.annotation.StudentImplementationRequired;
 public class Tree implements Mineable {
 
     /**
+     * Die aktuelle Haltbarkeit des Baums.
+     */
+    private double durability;
+
+    /**
      * Constructs a new {@link Tree} instance.
      */
     public Tree() {
+        // Baum startet mit voller Haltbarkeit.
+        setDurability(100);
     }
 
     @StudentImplementationRequired("H5.3")
@@ -39,18 +46,27 @@ public class Tree implements Mineable {
     @StudentImplementationRequired("H5.1")
     @Override
     public double getDurability() {
-        return org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.3 - remove if implemented
+        // Liefert die aktuelle Haltbarkeit.
+        return durability;
     }
 
     @StudentImplementationRequired("H5.1")
     @Override
     public void setDurability(double durability) {
-        org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.3 - remove if implemented
+        // Klemmt den Wert in den erlaubten Bereich [0, 100].
+        if (durability < 0) {
+            this.durability = 0;
+        } else if (durability > 100) {
+            this.durability = 100;
+        } else {
+            this.durability = durability;
+        }
     }
 
     @StudentImplementationRequired("H5.1")
     @Override
     public void reduceDurability(double amount) {
-        org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.3 - remove if implemented
+        // Reduziert die Haltbarkeit mithilfe des Setters für konsistente Validierung.
+        setDurability(getDurability() - amount);
     }
 }
