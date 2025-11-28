@@ -32,6 +32,8 @@ public class Camera implements Equipment {
      */
     @DoNotTouch
     public Camera(int visibilityRange) {
+        // Initialisiert die Sichtweite über den Setter, damit die Validierung greift.
+        setVisibilityRange(visibilityRange);
         this.visibilityRange = visibilityRange;
         // Kamera startet immer mit voller Haltbarkeit.
         setDurability(100);
@@ -52,7 +54,8 @@ public class Camera implements Equipment {
      */
     @StudentImplementationRequired("H5.2.2")
     public int getVisibilityRange() {
-        return org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.2.2 - remove if implemented
+        // Gibt die aktuelle Sichtweite zurück.
+        return visibilityRange;
     }
 
     /**
@@ -64,13 +67,15 @@ public class Camera implements Equipment {
      */
     @StudentImplementationRequired("H5.2.2")
     public void setVisibilityRange(int visibilityRange) {
-        org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.2.2 - remove if implemented
+        // Sichtweite darf minimal 1 sein.
+        this.visibilityRange = Math.max(1, visibilityRange);
     }
 
     @Override
     @StudentImplementationRequired("H5.2")
     public @NotNull String getName() {
-        return org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.2 - remove if implemented
+        // Klassennamen als eindeutigen Ausrüstungsnamen zurückgeben.
+        return getClass().getSimpleName();
     }
 
     @StudentImplementationRequired("H5.2.1")

@@ -115,13 +115,55 @@ public class MineBot extends Robot implements Miner {
     @StudentImplementationRequired("H5.4.2")
     @Override
     public @NotNull Point[] getVision(int x, int y) {
-        return org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.4.2 - remove if implemented
+        // Ist die Kamera kaputt, hat der Miner keine Sichtweite.
+        if (isCameraBroken()) {
+            return new Point[0];
+        }
+
+        // Sichtbarkeitsradius der Kamera bestimmen.
+        int visibilityRange = getCamera().getVisibilityRange();
+
+        // Alle sichtbaren Punkte innerhalb der Weltgrenzen sammeln (Manhattan-Radius).
+        java.util.List<Point> visiblePoints = new java.util.ArrayList<>();
+        for (int dx = -visibilityRange; dx <= visibilityRange; dx++) {
+            for (int dy = -visibilityRange; dy <= visibilityRange; dy++) {
+                if (Math.abs(dx) + Math.abs(dy) > visibilityRange) {
+                    continue;
+                }
+
+                int targetX = x + dx;
+                int targetY = y + dy;
+
+                // Nur Felder innerhalb der Welt berücksichtigen.
+                if (targetX >= 0 && targetX < h05.base.game.GameConstants.WORLD_WIDTH
+                    && targetY >= 0 && targetY < h05.base.game.GameConstants.WORLD_HEIGHT) {
+                    visiblePoints.add(new Point(targetX, targetY));
+                }
+            }
+        }
+
+        return visiblePoints.toArray(Point[]::new);
     }
 
     @StudentImplementationRequired("H5.4.2")
     @Override
     public void updateVision(int oldX, int oldY, int newX, int newY) {
-        org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.4.2 - remove if implemented
+        // Alte und neue Sichtbereiche ermitteln.
+        Point[] oldVision = getVision(oldX, oldY);
+        Point[] newVision = getVision(newX, newY);
+
+        // Neue Sichtpunkte sichtbar machen.
+        for (Point point : newVision) {
+            settings.removeFog(point.x, point.y);
+        }
+
+        // Punkte, die nicht mehr im Sichtbereich liegen, wieder verdecken.
+        java.util.Set<Point> newVisionSet = new java.util.HashSet<>(java.util.List.of(newVision));
+        for (Point point : oldVision) {
+            if (!newVisionSet.contains(point)) {
+                settings.placeFog(point.x, point.y);
+            }
+        }
     }
 
     @StudentImplementationRequired("H5.4.3")
