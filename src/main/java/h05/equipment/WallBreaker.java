@@ -1,5 +1,7 @@
 package h05.equipment;
 
+import fopbot.Wall;
+import h05.base.game.GameSettings;
 import h05.entity.Miner;
 import org.jetbrains.annotations.NotNull;
 import org.tudalgo.algoutils.student.annotation.StudentImplementationRequired;
@@ -27,13 +29,54 @@ public class WallBreaker implements UsableEquipment {
     @StudentImplementationRequired("H5.2.5")
     @Override
     public void use(@NotNull Miner miner) {
-        org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.2.5 - remove if implemented
+        // Führt keine Aktion aus, wenn der Wandbrecher kaputt ist.
+        if (getCondition() == EquipmentCondition.BROKEN) {
+            return;
+        }
+
+        // Ermittelt die Koordinaten und Ausrichtung der Wand direkt vor dem Miner.
+        int wallX = miner.getX();
+        int wallY = miner.getY();
+        boolean horizontal;
+
+        switch (miner.getDirection()) {
+            case UP:
+                // Horizontal liegende Wand oberhalb des aktuellen Feldes.
+                horizontal = true;
+                break;
+            case DOWN:
+                // Horizontal liegende Wand unterhalb des aktuellen Feldes.
+                wallY--;
+                horizontal = true;
+                break;
+            case RIGHT:
+                // Vertikale Wand rechts neben dem aktuellen Feld.
+                horizontal = false;
+                break;
+            case LEFT:
+                // Vertikale Wand links neben dem aktuellen Feld.
+                wallX--;
+                horizontal = false;
+                break;
+            default:
+                // Keine bekannte Blickrichtung -> keine Aktion.
+                return;
+        }
+
+        // Entfernt die Wand, falls an der ermittelten Stelle eine existiert.
+        GameSettings settings = miner.getGameSettings();
+        Wall frontWall = settings.getWallAt(wallX, wallY, horizontal);
+
+        if (frontWall != null) {
+            settings.removeEntity(frontWall);
+        }
     }
 
     @StudentImplementationRequired("H5.2")
     @Override
     public @NotNull String getName() {
-        return org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.2 - remove if implemented
+        // Der Name entspricht dem Klassennamen.
+        return getClass().getSimpleName();
     }
 
     @StudentImplementationRequired("H5.2.1")
