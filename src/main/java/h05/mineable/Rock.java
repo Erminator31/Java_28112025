@@ -13,44 +13,86 @@ import org.tudalgo.algoutils.student.annotation.StudentImplementationRequired;
 public class Rock implements Mineable {
 
     /**
+     * Die aktuelle Haltbarkeit des Steins.
+     */
+    private double durability;
+
+    /**
      * Constructs a new {@link Rock} instance.
      */
     public Rock() {
+        // Rock startet mit voller Haltbarkeit.
+        setDurability(100);
     }
 
     @StudentImplementationRequired("H5.3")
     @Override
     public @NotNull String getName() {
-        return org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.3 - remove if implemented
+        // Liefert den Klassennamen als eindeutige Bezeichnung.
+        return getClass().getSimpleName();
     }
 
     @StudentImplementationRequired("H5.3")
     @Override
     public @NotNull MiningProgress getProgress() {
-        return org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.3 - remove if implemented
+        // 0 -> fertig, 100 -> unberührt, dazwischen -> wird abgebaut.
+        if (getDurability() == 0) {
+            return MiningProgress.COMPLETED;
+        }
+        if (getDurability() < 100 && getDurability() >= 1) {
+            return MiningProgress.IN_PROGRESS;
+        }
+        return MiningProgress.UNSTARTED;
     }
 
     @StudentImplementationRequired("H5.3")
     @Override
     public boolean onMined(@Nullable Tool tool) {
-        return org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.3 - remove if implemented
+        // Berechnet die Haltbarkeitsreduktion abhängig vom verwendeten Werkzeug.
+        double reduction = 0;
+
+        if (tool == null) {
+            // Ohne Werkzeug: fester Abzug.
+            reduction = 5;
+        } else if (tool instanceof h05.equipment.Axe) {
+            // Axt: Faktor 1,5 auf die Werkzeugstärke.
+            reduction = 1.5 * tool.getMiningPower();
+        } else if (tool instanceof h05.equipment.Pickaxe) {
+            // Spitzhacke: doppelter Faktor auf die Werkzeugstärke.
+            reduction = 2 * tool.getMiningPower();
+        }
+
+        // Trägt die Reduktion auf die Haltbarkeit auf.
+        reduceDurability(reduction);
+
+        // Gibt zurück, ob der Stein vollständig abgebaut wurde.
+        return getDurability() == 0;
     }
 
     @StudentImplementationRequired("H5.1")
     @Override
     public double getDurability() {
-        return org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.1 - remove if implemented
+        // Gibt die aktuelle Haltbarkeit zurück.
+        return durability;
     }
 
     @StudentImplementationRequired("H5.1")
     @Override
     public void setDurability(double durability) {
-        org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.1 - remove if implemented
+        // Klemmt die Haltbarkeit in den Bereich [0, 100].
+        if (durability < 0) {
+            this.durability = 0;
+        } else if (durability > 100) {
+            this.durability = 100;
+        } else {
+            this.durability = durability;
+        }
     }
 
     @StudentImplementationRequired("H5.1")
     @Override
     public void reduceDurability(double amount) {
-        org.tudalgo.algoutils.student.Student.crash(); // TODO: H5.1 - remove if implemented
+        // Reduziert die Haltbarkeit sicher über den Setter.
+        setDurability(getDurability() - amount);
     }
 }
